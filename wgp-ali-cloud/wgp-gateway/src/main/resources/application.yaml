@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: wgp-gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 115.159.41.74:8848
+    gateway:
+      discovery:
+        locator:
+          # 是否与服务发现组件进行结合，通过serviceId转发到具体的服务实例。默认false，
+          # 为true代表开启基于服务发现的路由规则。
+          enabled: true
+          # 配置之后访问时无需大写
+          lower-case-service-id: true
+      routes:
+        - id: normal-rest
+          uri: lb://normal-rest
+          predicates:
+            # 路径匹配，以 api 开头，直接配置是不生效的，看 filters 配置
+            - Path=/normal/**
+          filters:
+            # 前缀过滤，默认配置下，我们的请求路径是 http://localhost:9000/myshop-service-consumer-item/** 这时会路由到指定的服务
+            # 此处配置去掉 1 个路径前缀，再配置上面的 Path=/api/**，就能按照 http://localhost:9000/api/** 的方式访问了
+            - StripPrefix=1
+server:
+  port: 8081
+  servlet:
+    context-path: /gateway
